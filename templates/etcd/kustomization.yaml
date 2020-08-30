@@ -1,0 +1,17 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+commonLabels:
+  app.kubernetes.io/name: etcd
+configMapGenerator:
+- name: etcd-scripts
+  behavior: merge
+  files:
+  - scripts/prestop-hook.sh
+  - scripts/probes.sh
+  - scripts/setup.sh
+resources:
+- configmap.yaml
+- scripts-configmap.yaml
+- service.yaml
+- service-headless.yaml
+- statefulset.yaml

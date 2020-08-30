@@ -1,0 +1,30 @@
+---
+# Source: weaviate/templates/contextionaryDeployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: contextionary
+  labels:
+    app.kubernetes.io/name: contextionary
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: contextionary
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: contextionary
+    spec:
+      containers:
+      - name: contextionary
+        image: docker.io/semitechnologies/contextionary:en0.16.0-v0.4.9
+        env:
+          - name: SCHEMA_PROVIDER_URL
+            value: http://etcd:2379
+        resources:
+          limits:
+            cpu: 1000m
+            memory: 5000Mi
+          requests:
+            cpu: 500m
+            memory: 200Mi

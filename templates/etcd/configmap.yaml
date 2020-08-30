@@ -1,0 +1,7 @@
+# Source: weaviate/templates/etcdConfigMap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: etcd-config
+data:
+  ETCD_AUTO_COMPACTION_RETENTION: "4"

@@ -1,0 +1,14 @@
+---
+# Source: weaviate/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: weaviate
+spec:
+  type: LoadBalancer
+  selector:
+    app.kubernetes.io/name: weaviate
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8080

@@ -1,0 +1,11 @@
+---
+# Source: weaviate/charts/esvector/templates/poddisruptionbudget.yaml
+apiVersion: policy/v1beta1
+kind: PodDisruptionBudget
+metadata:
+  name: "esvector-master-pdb"
+spec:
+  maxUnavailable: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: esvector

@@ -1,0 +1,14 @@
+---
+# Source: weaviate/templates/contextionaryService.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: contextionary
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: contextionary
+  ports:
+    - protocol: TCP
+      port: 9999
+      targetPort: 9999

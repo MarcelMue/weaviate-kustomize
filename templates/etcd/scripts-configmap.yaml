@@ -1,0 +1,6 @@
+# Source: weaviate/charts/etcd/templates/scripts-configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: etcd-scripts
+

@@ -1,0 +1,28 @@
+---
+# Source: weaviate/templates/weaviateConfigMap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: weaviate-config
+data:
+  conf.yaml: |-
+    ---
+    authentication:
+      anonymous_access:
+        enabled: true
+    authorization:
+      admin_list:
+        enabled: false
+    configuration_storage:
+      type: etcd
+      url: http://etcd:2379
+    contextionary:
+      url: contextionary:9999
+    query_defaults:
+      limit: 100
+    debug: false
+    telemetry:
+      disabled: true
+    vector_index:
+      enabled: true
+      url: http://esvector-master:9200

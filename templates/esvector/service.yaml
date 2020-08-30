@@ -1,0 +1,40 @@
+---
+# Source: weaviate/charts/esvector/templates/service.yaml
+kind: Service
+apiVersion: v1
+metadata:
+  name: esvector-master
+  labels:
+    app.kubernetes.io/name: esvector
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: esvector
+  ports:
+  - name: http
+    protocol: TCP
+    port: 9200
+  - name: transport
+    protocol: TCP
+    port: 9300
+---
+# Source: weaviate/charts/esvector/templates/service.yaml
+kind: Service
+apiVersion: v1
+metadata:
+  name: esvector-master-headless
+  labels:
+    app.kubernetes.io/name: esvector
+  annotations:
+    service.alpha.kubernetes.io/tolerate-unready-endpoints: "true"
+spec:
+  clusterIP: None # This is needed for statefulset hostnames like elasticsearch-0 to resolve
+  # Create endpoints also if the related pod isn't ready
+  publishNotReadyAddresses: true
+  selector:
+    app.kubernetes.io/name: esvector
+  ports:
+  - name: http
+    port: 9200
+  - name: transport
+    port: 9300

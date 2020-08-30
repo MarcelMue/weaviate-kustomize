@@ -1,0 +1,124 @@
+# Source: weaviate/charts/etcd/templates/statefulset.yaml
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: etcd
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: etcd
+  serviceName: etcd-headless
+  podManagementPolicy: Parallel
+  replicas: 1
+  updateStrategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: etcd
+      annotations:
+        prometheus.io/port: "2379"
+        prometheus.io/scrape: "true"
+    spec:
+      securityContext:
+        fsGroup: 1001
+        runAsUser: 1001
+      containers:
+        # Variables to populate static cluster
+        - name: etcd
+          image: docker.io/bitnami/etcd:3.4.9-debian-10-r0
+          imagePullPolicy: "IfNotPresent"
+          command:
+            - /scripts/setup.sh
+          lifecycle:
+            preStop:
+              exec:
+                command:
+                  - /scripts/prestop-hook.sh
+          envFrom:
+            - configMapRef:
+                name: etcd-config
+          env:
+            - name: BITNAMI_DEBUG
+              value: "false"
+            - name: MY_POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+            - name: MY_POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: ETCDCTL_API
+              value: "3"
+            - name: ETCD_NAME
+              value: "$(MY_POD_NAME)"
+            - name: ETCD_DATA_DIR
+              value: /bitnami/etcd/data
+            - name: ETCD_ADVERTISE_CLIENT_URLS
+              value: "http://$(MY_POD_NAME).etcd-headless.default.svc.cluster.local:2379"
+            - name: ETCD_LISTEN_CLIENT_URLS
+              value: "http://0.0.0.0:2379"
+            - name: ETCD_INITIAL_ADVERTISE_PEER_URLS
+              value: "https://$(MY_POD_NAME).etcd-headless.default.svc.cluster.local:2380"
+            - name: ETCD_LISTEN_PEER_URLS
+              value: "https://0.0.0.0:2380"
+            - name: ETCD_INITIAL_CLUSTER_TOKEN
+              value: "etcd-cluster-k8s"
+            - name: ETCD_INITIAL_CLUSTER_STATE
+              value: "new"
+            - name: ETCD_INITIAL_CLUSTER
+              value: etcd-0=https://etcd-0.etcd-headless.default.svc.cluster.local:2380
+            - name: ALLOW_NONE_AUTHENTICATION
+              value: "yes"
+            - name: ETCD_PEER_AUTO_TLS
+              value: "true"
+          ports:
+            - name: client
+              containerPort: 2379
+            - name: peer
+              containerPort: 2380
+          livenessProbe:
+            exec:
+              command:
+                - /scripts/probes.sh
+            initialDelaySeconds: 60
+            periodSeconds: 30
+            timeoutSeconds: 5
+            successThreshold: 1
+            failureThreshold: 5
+          readinessProbe:
+            exec:
+              command:
+                - /scripts/probes.sh
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            timeoutSeconds: 5
+            successThreshold: 1
+            failureThreshold: 5
+          volumeMounts:
+            - name: scripts
+              mountPath: /scripts/setup.sh
+              subPath: setup.sh
+            - name: scripts
+              mountPath: /scripts/prestop-hook.sh
+              subPath: prestop-hook.sh
+            - name: scripts
+              mountPath: /scripts/probes.sh
+              subPath: probes.sh
+            - name: data
+              mountPath: /bitnami/etcd
+      volumes:
+        - name: scripts
+          configMap:
+            name: etcd-scripts
+            defaultMode: 0755
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes:
+          - "ReadWriteOnce"
+        resources:
+          requests:
+            storage: "1Gi"
