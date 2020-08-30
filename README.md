@@ -2,7 +2,7 @@
 
 Intended to run a minimal [weaviate](https://github.com/semi-technologies/weaviate) setup in a local [KIND](https://kind.sigs.k8s.io/) cluster.
 
-Instructions to run:
+Instructions to run & apply to the KIND cluster:
 ```
 kustomize build > out.yaml
 kubectl apply -f out.yaml
